@@ -1,0 +1,6 @@
+{
+  "name": "TrustVault — Secure Document Sharing & Audit Trail",
+  "description": "Zero-leakage enterprise document vault with cryptographic hash-chained audit trails, instant revocation, and multi-role RBAC for the Snovasys RISE 2026 Challenge.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

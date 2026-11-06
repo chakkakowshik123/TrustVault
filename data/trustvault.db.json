@@ -1,0 +1,196 @@
+{
+  "users": [
+    {
+      "id": "usr_admin",
+      "name": "Sarah Connor (Security Admin)",
+      "email": "admin@trustvault.internal",
+      "role": "ADMIN",
+      "department": "Information Security & Compliance",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+      "password": "AdminSecure#2026"
+    },
+    {
+      "id": "usr_owner_alice",
+      "name": "Alice Morgan (Document Owner)",
+      "email": "alice.owner@trustvault.internal",
+      "role": "DOCUMENT_OWNER",
+      "department": "Legal & Executive Contracts",
+      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop&q=80",
+      "password": "AliceVault#2026"
+    },
+    {
+      "id": "usr_owner_bob",
+      "name": "Bob Henderson (Document Owner)",
+      "email": "bob.owner@trustvault.internal",
+      "role": "DOCUMENT_OWNER",
+      "department": "Finance & Executive Compensation",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
+      "password": "BobVault#2026"
+    },
+    {
+      "id": "usr_viewer_carol",
+      "name": "Carol Davies (Internal Viewer)",
+      "email": "carol.viewer@trustvault.internal",
+      "role": "VIEWER",
+      "department": "Operations & Procurement",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80",
+      "password": "CarolView#2026"
+    },
+    {
+      "id": "usr_external_dave",
+      "name": "Dave Wilson (External Auditor)",
+      "email": "dave.external@partner.org",
+      "role": "EXTERNAL_PARTNER",
+      "department": "KPMG External Assurance",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80",
+      "password": "DavePartner#2026"
+    },
+    {
+      "id": "usr_attacker_mallory",
+      "name": "Mallory Vance (Simulated Attacker)",
+      "email": "mallory.attacker@hostile.com",
+      "role": "ATTACKER",
+      "department": "Threat Vector Simulation",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80",
+      "password": "MalloryPwn#2026"
+    }
+  ],
+  "documents": [
+    {
+      "id": "doc-eng-003",
+      "title": "Quantum Neural Hybrid Architecture Whitepaper",
+      "description": "Deep architectural blueprint for post-quantum key encapsulation and zero-trust verification engines.",
+      "category": "ENGINEERING",
+      "securityLevel": "RESTRICTED",
+      "tags": [
+        "quantum",
+        "cryptography",
+        "architecture",
+        "rfc"
+      ],
+      "filename": "TrustVault_Architecture_Whitepaper_v3.pdf",
+      "mimeType": "application/pdf",
+      "fileSize": 852000,
+      "ownerId": "usr_owner_alice",
+      "ownerName": "Alice Morgan",
+      "ownerEmail": "alice.owner@trustvault.internal",
+      "createdAt": "2026-11-01T14:20:00.000Z",
+      "updatedAt": "2026-11-01T14:20:00.000Z",
+      "permissionVersion": 1,
+      "encryptedBlobKey": "blob_eng_quantum",
+      "previewContent": "TRUSTVAULT CORE SECURITY SPECIFICATION: QUANTUM NEURAL HYBRID\nVersion: 3.4.0 — November 2026 Architecture Standard\nKey Encapsulation: Kyber-1024 post-quantum key encapsulation combined with AES-256-GCM symmetric transport.\nMerkle Hash Tree: Chained SHA-256 hash digests with zero-knowledge verification tokens for client-side non-repudiation.\nRevocation Guarantee: Sub-millisecond epoch cache invalidation across edge reverse proxies.",
+      "permissions": [
+        {
+          "userId": "usr_viewer_carol",
+          "userName": "Carol Davies",
+          "userEmail": "carol.viewer@trustvault.internal",
+          "accessLevel": "DOWNLOAD",
+          "grantedAt": "2026-11-01T15:00:00.000Z",
+          "grantedBy": "usr_owner_alice",
+          "grantedByName": "Alice Morgan",
+          "notes": "Permitted to download PDF for partner security audit."
+        }
+      ]
+    },
+    {
+      "id": "doc-finance-002",
+      "title": "Q4 Executive Bonus & Compensation Ledger (Classified)",
+      "description": "Executive committee compensation distribution, equity schedules, and performance bonus pool approvals.",
+      "category": "FINANCE",
+      "securityLevel": "SECRET",
+      "tags": [
+        "payroll",
+        "bonuses",
+        "executive",
+        "restricted"
+      ],
+      "filename": "Executive_Compensation_Q4_2026.xlsx",
+      "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "fileSize": 184500,
+      "ownerId": "usr_owner_bob",
+      "ownerName": "Bob Henderson",
+      "ownerEmail": "bob.owner@trustvault.internal",
+      "createdAt": "2026-11-01T11:15:00.000Z",
+      "updatedAt": "2026-11-01T11:15:00.000Z",
+      "permissionVersion": 1,
+      "encryptedBlobKey": "blob_finance_q4_comp",
+      "previewContent": "STRICTLY SECRET & PRIVILEGED — EXECUTIVE COMMITTEE ONLY\nFY2026 Q4 Performance Bonuses & Equity Vesting Schedule\nC-Suite Allocation:\n- CEO: $450,000 + 40,000 RSUs (Target Multiplier: 1.4x)\n- CTO: $380,000 + 35,000 RSUs (Target Multiplier: 1.35x)\n- VP Legal: $310,000 + 25,000 RSUs (Target Multiplier: 1.25x)\n- Head of Finance: $290,000 + 22,000 RSUs (Target Multiplier: 1.20x)\nTotal Pool Outlay: $3,450,000 Approved by Compensation Committee on Oct 28, 2026.",
+      "permissions": []
+    },
+    {
+      "id": "doc-legal-001",
+      "title": "Enterprise Master Services Agreement — Acme Corp 2026",
+      "description": "Bilateral enterprise agreement covering multi-year cloud vault licensing, security SLAs, and liability caps.",
+      "category": "LEGAL",
+      "securityLevel": "CONFIDENTIAL",
+      "tags": [
+        "contract",
+        "acme",
+        "enterprise",
+        "sla"
+      ],
+      "filename": "AcmeCorp_MSA_Executed_2026.pdf",
+      "mimeType": "application/pdf",
+      "fileSize": 421000,
+      "ownerId": "usr_owner_alice",
+      "ownerName": "Alice Morgan",
+      "ownerEmail": "alice.owner@trustvault.internal",
+      "createdAt": "2026-11-01T08:30:00.000Z",
+      "updatedAt": "2026-11-01T08:30:00.000Z",
+      "permissionVersion": 1,
+      "encryptedBlobKey": "blob_contract_acme_2026",
+      "previewContent": "CONFIDENTIAL MASTER SERVICES AGREEMENT\nParties: TrustVault Inc. & Acme Corporation (Global Enterprise Agreement)\nEffective Term: November 2026 — November 2029\nContract Value: $4,850,000 USD Annual Recurring\nSLA Guarantee: 99.99% Availability with 15-minute response on P0 security incidents.\nIntellectual Property: All cryptographic zero-knowledge keys remain the sole property of the client.\nSignatures: Alice Morgan (VP Legal, TrustVault) & Johnathan Acme (CEO, Acme Corp)",
+      "permissions": [
+        {
+          "userId": "usr_viewer_carol",
+          "userName": "Carol Davies",
+          "userEmail": "carol.viewer@trustvault.internal",
+          "accessLevel": "READ",
+          "grantedAt": "2026-11-01T09:00:00.000Z",
+          "grantedBy": "usr_owner_alice",
+          "grantedByName": "Alice Morgan",
+          "notes": "Access granted strictly to review contractual SLA obligations."
+        }
+      ]
+    }
+  ],
+  "encryptedBlobs": {
+    "blob_contract_acme_2026": {
+      "ciphertext": "264f674aaec49b2cd8876cec5a4950ef65fc6b86fb93ecbe7485f7fe57a19b63301358b10e98de8fa6eebba31aeaacdf7e39e53ac09360cf3a2c050971b800d3ce0e8e2229b685c6cc7478d20b54654974bb1f142bab66eee57d014677637a93652345718794c093f4e7a2a9be7f89badb5d07c24c1853492d48f0e83a4256643052a08b1f31f8ce2e76255d80029520d59b26c700261c5240e8f4e447ef244a8e6792bca4a00a71cd2e5ca0e261b8aca69bb375ca8ee01c97eb4d4fd791cd08f5074d7bf86b4ee9c6f02ce956c43288a59000692777ec1c0d28f646bbf8f55bba4c32884a26b08df209f148e187afef548c8e777cfb270723f08f79797e5cecdbd7f93872ccf6e3fd7162c8a3dce623d8eebd0df755188815a7643b07afc46ca28ca1b8f8d5ffd0b954fa095d7be190208181054bfc9a7e870d37f53626ea87efb871d833d1f09da0a335e9031355cc455538ce74c4cda5e450e99c2707ad6ca6c8bca9bbad66c988f96f22490ad9f7d040437eca0e932eceb9349248f50312f4bd24e0426d8f09c334c55a9dcaa288ffd673688af6c59bd18af80b339707927a903856df5e53d7a37251326feb0c009c5db13be85f3d88c1ac1117a2aa5e0f2affd06381df91b6bdc8c5c5c82763702975f88a8e42a73f12a13c5c",
+      "iv": "a28bd2b3bd598aa555ec445ca87e09f5",
+      "authTag": "df952450c0c1ce004be25a2f3d319873"
+    },
+    "blob_finance_q4_comp": {
+      "ciphertext": "a86311834cc833f055f5a82ac115ddf407281810f6eb7628f3c99637f4099ce7a9b6a5c8e674477965c3cbe529376fb611e3d6411571824f7895359b7e31e2901afb30bb3a6c3488cf80d818217515bf4fe2b234cf18762aad9224d118734690f3bbcae886d69bc80f9a81674df747529af80568d356d264ff2fe13146382ab285bb26df46c86a91e19871069951c61e05ae001fd544c2e635f521574b0f85da640c76b38bf3020c67f63dcfc6263b61d3167ca90aedbe62a999ca067de857428c1b3a90a4bb731b6427c446330ecf859c86e11938520c31fc6d1a8e96659abcf11e0facceb972b49fc0b5ec1cdde82b1ff77ac10463086e8f487392a364caa7ff5930bbd741d1e3597e75e1f81ddaea3494f45a529dc2cf47f9a23da762483efbb781fadd0666591c8708073e2b300c438cee237cc6c2a9f5f269a68b0dfbfe19347caf31edc47e14374dcbc32a15f8e005f65c1b5bf7dae49bc70620c596167cbc257d6cb65875c5cf46cf10df1dd36213e67eb20db18e12c02618b73d715dd1e8adb62f657f6ec5f106e67fb4b132e270c50b2c989e9100db40837c138400d6a6b98291076d11f76481ba93faa1bb7e792057976695f7d28194bc1f8a1718080ce97fd7a80e82397bc3",
+      "iv": "e48049fe266d0893a1d68e66fa459b2c",
+      "authTag": "cac2dc14762a8469cbd3dd5f214281bf"
+    },
+    "blob_eng_quantum": {
+      "ciphertext": "ccd4a8c75f65fe9f7c6adc5684509fa89c2f482c6fdf7046b1ec6a393d6c68ae16cd97e8a81d9c3e5f34efb4aa830312eed53651c3f5bb1e64784a67af5d294867268cb1610df90a7ca5eb496fb6a35d3c3eefca4fe0a80e90e6d1fa7b15a9022d88c8d966ffd8ca3558be70f966c7b926924a52fe29e7f818679a34c0c289226a5fc7f1579a65a0c439b71d4be43f0a2000b3662746614642811cb9cd1a95e0b4dd321b1205257887b5117046ffc40ce992d5e99a7ee81d9253a8225a5e2c53243be40312c44d56ddab66f62e1870251cf48a3ab2ba7da9629eff86460ab760cdaa3d0046ddcdb056535b9a5d4e1b011fc79b3cb101abaae756e524b42d9d903222f91a68ed326e09b7a1e5c835eb1f2052c07c0ca0c70d4dae9e1b639bce109fa5efebc246f75a74aab7d95956a8c54edfcab99e2206abef4fab503154230e3f7d50408dcc7e1e7f848cab3a0e7a9b864e5e4469ada5a19c5fe6e559d1f6d01a7b8f7d5969cccbfbaa9e7fdc77078038734e02ee719dbd78702c2c312570051bab08dc5fe420560249ca83023373520577a2fbdbc7fa4b1b7131a9cee054a8c60ac13529f52d4aa377235e1cbe1c7829afb17a",
+      "iv": "f9109dfa9ad3723d79193813c160fba3",
+      "authTag": "8d33e0136a1662879a69ae03da8f09a9"
+    }
+  },
+  "auditLedger": [
+    {
+      "index": 0,
+      "timestamp": "2026-11-04T12:01:49.160Z",
+      "action": "VERIFY_AUDIT_TRAIL",
+      "actor": {
+        "id": "usr_admin",
+        "name": "Sarah Connor (Security Admin)",
+        "email": "admin@trustvault.internal",
+        "role": "ADMIN"
+      },
+      "documentId": null,
+      "documentTitle": null,
+      "status": "SUCCESS",
+      "ipAddress": "127.0.0.1",
+      "details": "TrustVault Cryptographic Ledger Initialized. Root Genesis Block Sealed.",
+      "previousHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "entryHash": "3ff6beca6224e6a95ad926fa9ce598550d4e3498f06d4cc465cc6321a2ceec84"
+    }
+  ],
+  "version": "1.0.0",
+  "lastInitialized": "2026-11-04T12:01:49.087Z"
+}
