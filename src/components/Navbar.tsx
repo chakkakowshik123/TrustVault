@@ -152,7 +152,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Specs & THREATS.md</span>
+                <span>SQL Studio & Docs (PROMPTS.md)</span>
               </button>
             </nav>
 

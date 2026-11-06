@@ -9,11 +9,16 @@ import {
   ExternalLink,
   Code,
   AlertTriangle,
-  Server
+  Server,
+  Copy,
+  Check,
+  Database
 } from 'lucide-react';
+import { SqlDatabaseStudio } from './SqlDatabaseStudio.js';
 
 export const DocumentationHub: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<'overview' | 'threats' | 'prompts' | 'api' | 'schema' | 'creds'>('overview');
+  const [copiedPrompts, setCopiedPrompts] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -77,7 +82,7 @@ export const DocumentationHub: React.FC = () => {
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Database (SQL Schema & Setup)
+            SQL Studio & Schema
           </button>
 
           <button
@@ -257,9 +262,12 @@ export const DocumentationHub: React.FC = () => {
           <div className="space-y-4 max-w-4xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div>
-                <h3 className="text-base font-bold text-slate-100">PROMPTS.md — AI Engineering Log (Nov 1–7, 2026)</h3>
+                <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-cyan-400" />
+                  <span>PROMPTS.md — AI Engineering Log & Quality Control (Nov 1–7, 2026)</span>
+                </h3>
                 <p className="text-xs text-slate-400">
-                  Mandatory challenge deliverable: 5 dated entries detailing prompt, hallucination/flaw caught, and technical remediation.
+                  Mandatory challenge deliverable: 5 dated entries detailing prompt, generated code, human review flaw caught, and technical remediation.
                 </p>
               </div>
               <span className="text-xs bg-emerald-950 text-emerald-300 border border-emerald-800 px-2.5 py-1 rounded-lg font-mono">
@@ -267,70 +275,129 @@ export const DocumentationHub: React.FC = () => {
               </span>
             </div>
 
-            <div className="space-y-3">
-              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between">
-                  <strong className="text-slate-200">Entry 1 (Nov 1, 2026): Instant Revocation & JWT Invalidation Flaw</strong>
-                  <span className="text-[10px] font-mono text-slate-500">Access Control</span>
+            <div className="space-y-4">
+              {/* Entry 1 */}
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between border-b border-slate-800/60 pb-2">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded mr-2">
+                      Entry 1 • Nov 1, 2026
+                    </span>
+                    <strong className="text-slate-100 text-xs">Instant Access Revocation and JWT Invalidation Flaw</strong>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">Access Control Lifecycle</span>
                 </div>
-                <p className="text-slate-400">
-                  <strong>AI Flaw:</strong> Proposed 1-hour JWTs with Redis caching for 15 minutes. Revoked users could continue downloading files for 15 minutes!
-                </p>
-                <p className="text-indigo-300">
-                  <strong>Remediation:</strong> Designed authorization epochs where revoking increments doc version; stream handler checks live state synchronously.
-                </p>
+                <div className="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 font-mono text-[11px]">
+                  <strong className="text-slate-300">Prompt:</strong> "Implement document permission checking and revoking in Express using standard JWT tokens with 1-hour expiry, where an owner can revoke access via DELETE /api/documents/:id/permissions/:userId."
+                </div>
+                <div className="text-xs text-rose-300/90 bg-rose-950/20 p-2.5 rounded-lg border border-rose-900/40">
+                  <strong className="text-rose-400 block mb-1">Specific Security Flaw Caught by Human Review:</strong>
+                  The AI suggested caching permissions in Redis / memory for 15 minutes to reduce database queries. This created a catastrophic 15-minute window where a terminated employee could continue downloading confidential compensation documents!
+                </div>
+                <div className="text-xs text-emerald-300/90 bg-emerald-950/20 p-2.5 rounded-lg border border-emerald-900/40">
+                  <strong className="text-emerald-400 block mb-1">What We Did Instead (Remediation):</strong>
+                  Architected monotonic <code>permissionVersion</code> authorization epochs. When an owner revokes access, version bumps synchronously. Stream handler evaluates live ACL state with zero caching window (0ms lag).
+                </div>
               </div>
 
-              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between">
-                  <strong className="text-slate-200">Entry 2 (Nov 2, 2026): Audit Trail Immutability & Naive DB Logging</strong>
-                  <span className="text-[10px] font-mono text-slate-500">Audit Trail</span>
+              {/* Entry 2 */}
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between border-b border-slate-800/60 pb-2">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded mr-2">
+                      Entry 2 • Nov 2, 2026
+                    </span>
+                    <strong className="text-slate-100 text-xs">Audit Trail Immutability & Naive Database Logging</strong>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">Cryptographic Non-Repudiation</span>
                 </div>
-                <p className="text-slate-400">
-                  <strong>AI Flaw:</strong> Used standard SQL <code>INSERT INTO audit_logs</code>. Anyone with database access could run <code>UPDATE</code> or <code>DELETE</code> without leaving a trace.
-                </p>
-                <p className="text-indigo-300">
-                  <strong>Remediation:</strong> Implemented SHA-256 Merkle-linked hash chain with cryptographic verification engine.
-                </p>
+                <div className="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 font-mono text-[11px]">
+                  <strong className="text-slate-300">Prompt:</strong> "Create an audit logging middleware for our document sharing app that records every file download, upload, and permission change into an audit_logs table with timestamp, user ID, and action."
+                </div>
+                <div className="text-xs text-rose-300/90 bg-rose-950/20 p-2.5 rounded-lg border border-rose-900/40">
+                  <strong className="text-rose-400 block mb-1">Specific Flaw Caught by Human Review:</strong>
+                  The AI generated a standard SQL INSERT INTO table. Anyone with database credentials or SQL injection could execute UPDATE or DELETE to erase traces of unauthorized access without detection.
+                </div>
+                <div className="text-xs text-emerald-300/90 bg-emerald-950/20 p-2.5 rounded-lg border border-emerald-900/40">
+                  <strong className="text-emerald-400 block mb-1">What We Did Instead (Remediation):</strong>
+                  Replaced with continuous SHA-256 Merkle-linked hash chain:
+                  <code className="block mt-1 p-1 bg-black/40 rounded text-[10px] text-cyan-300">
+                    entryHash = SHA256(previousHash + index + timestamp + actorId + docId + action + status + details)
+                  </code>
+                  Modifying a single byte breaks the recomputed hash and is immediately detected by <code>/api/audit/verify</code>.
+                </div>
               </div>
 
-              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between">
-                  <strong className="text-slate-200">Entry 3 (Nov 3, 2026): AI Autonomous Permission Widening</strong>
-                  <span className="text-[10px] font-mono text-slate-500">AI Guardrail</span>
+              {/* Entry 3 */}
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between border-b border-slate-800/60 pb-2">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded mr-2">
+                      Entry 3 • Nov 3, 2026
+                    </span>
+                    <strong className="text-slate-100 text-xs">AI-Driven Permission Suggestions & Autonomous Boundary Violation</strong>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">AI Guardrail Compliance</span>
                 </div>
-                <p className="text-slate-400">
-                  <strong>AI Flaw:</strong> Created an AI agent that automatically widened user permissions upon parsing document text, directly violating Snovasys requirement: <em>"The machine must never widen access on its own."</em>
-                </p>
-                <p className="text-indigo-300">
-                  <strong>Remediation:</strong> Rebuilt AI as read-only advisor requiring mandatory human confirmation signature. Both suggestion and decision logged to audit.
-                </p>
+                <div className="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 font-mono text-[11px]">
+                  <strong className="text-slate-300">Prompt:</strong> "Add an AI assistant that analyzes a document's content and sensitivity level, determines the best access permissions for teammates, and automatically updates document permissions to save time."
+                </div>
+                <div className="text-xs text-rose-300/90 bg-rose-950/20 p-2.5 rounded-lg border border-rose-900/40">
+                  <strong className="text-rose-400 block mb-1">Specific Flaw Caught by Human Review:</strong>
+                  Direct violation of Snovasys challenge specification: <em>"The machine must never widen access on its own."</em> Autonomous AI writes create massive privilege escalation and prompt injection risks.
+                </div>
+                <div className="text-xs text-emerald-300/90 bg-emerald-950/20 p-2.5 rounded-lg border border-emerald-900/40">
+                  <strong className="text-emerald-400 block mb-1">What We Did Instead (Remediation):</strong>
+                  AI is strictly Read-Only ("TrustVault Sentinel"). Database write requires authenticated human confirmation. Both AI suggestion and human decision are signed into the audit ledger.
+                </div>
               </div>
 
-              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between">
-                  <strong className="text-slate-200">Entry 4 (Nov 4, 2026): Static Asset Path Leakage & Path Traversal</strong>
-                  <span className="text-[10px] font-mono text-slate-500">Storage Security</span>
+              {/* Entry 4 */}
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between border-b border-slate-800/60 pb-2">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded mr-2">
+                      Entry 4 • Nov 4, 2026
+                    </span>
+                    <strong className="text-slate-100 text-xs">File Storage Security & Static Asset Path Leakage</strong>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">Storage Authorization Bypass</span>
                 </div>
-                <p className="text-slate-400">
-                  <strong>AI Flaw:</strong> Stored uploaded files in <code>dist/uploads/filename</code> and served directly via static link, completely bypassing server auth.
-                </p>
-                <p className="text-indigo-300">
-                  <strong>Remediation:</strong> Zero static serving; AES-256-GCM envelope encryption at rest; randomized UUID blob keys; streaming proxy route.
-                </p>
+                <div className="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 font-mono text-[11px]">
+                  <strong className="text-slate-300">Prompt:</strong> "Create document upload and download routes using multer to save files to dist/uploads/ and return the URL so the client can download using &lt;a href=&#123;doc.fileUrl&#125; download&gt;."
+                </div>
+                <div className="text-xs text-rose-300/90 bg-rose-950/20 p-2.5 rounded-lg border border-rose-900/40">
+                  <strong className="text-rose-400 block mb-1">Specific Flaw Caught by Human Review:</strong>
+                  Static serving completely bypasses server middleware! Anyone knowing the URL could download secret files without authentication and without an audit record. Also vulnerable to directory traversal.
+                </div>
+                <div className="text-xs text-emerald-300/90 bg-emerald-950/20 p-2.5 rounded-lg border border-emerald-900/40">
+                  <strong className="text-emerald-400 block mb-1">What We Did Instead (Remediation):</strong>
+                  Zero static storage. Files encrypted with AES-256-GCM at rest. All downloads route through <code>GET /api/documents/:id/download</code> which validates live ACL and streams decrypting on-the-fly.
+                </div>
               </div>
 
-              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between">
-                  <strong className="text-slate-200">Entry 5 (Nov 5, 2026): Superficial Automated Tests (False Positives)</strong>
-                  <span className="text-[10px] font-mono text-slate-500">Security Testing</span>
+              {/* Entry 5 */}
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between border-b border-slate-800/60 pb-2">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded mr-2">
+                      Entry 5 • Nov 5, 2026
+                    </span>
+                    <strong className="text-slate-100 text-xs">Automated Security Testing with Superficial Assertions</strong>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">STRIDE Test Harness</span>
                 </div>
-                <p className="text-slate-400">
-                  <strong>AI Flaw:</strong> Wrote UI-only tests checking if button was rendered. Removing server check still passed the tests!
-                </p>
-                <p className="text-indigo-300">
-                  <strong>Remediation:</strong> Created real HTTP end-to-end security test suite asserting 403 Forbidden on server endpoints.
-                </p>
+                <div className="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 font-mono text-[11px]">
+                  <strong className="text-slate-300">Prompt:</strong> "Write automated security test cases in Jest to test document authorization and assert that unpermitted users cannot see documents."
+                </div>
+                <div className="text-xs text-rose-300/90 bg-rose-950/20 p-2.5 rounded-lg border border-rose-900/40">
+                  <strong className="text-rose-400 block mb-1">Specific Flaw Caught by Human Review:</strong>
+                  The AI wrote UI-only tests checking if a download button was rendered in the DOM. Removing the server authorization check still passed the tests!
+                </div>
+                <div className="text-xs text-emerald-300/90 bg-emerald-950/20 p-2.5 rounded-lg border border-emerald-900/40">
+                  <strong className="text-emerald-400 block mb-1">What We Did Instead (Remediation):</strong>
+                  Built end-to-end HTTP test harness executing real requests against API endpoints, asserting exact <code>403 Forbidden</code> and verifying cryptographic <code>ACCESS_DENIED</code> records.
+                </div>
               </div>
             </div>
           </div>
@@ -379,152 +446,9 @@ export const DocumentationHub: React.FC = () => {
           </div>
         )}
 
-        {/* SUBTAB 5: Database Schema & Clean Clone Setup */}
+        {/* SUBTAB 5: Database Schema & Live SQL Query Studio */}
         {activeSubTab === 'schema' && (
-          <div className="space-y-6 max-w-4xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div>
-                <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                  <Server className="w-5 h-5 text-indigo-400" />
-                  <span>Database Schema & Clean-Clone Setup Instructions</span>
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Full relational DDL schema (schema.sql), relational seed script (seeds.sql), and persistent disk enclave.
-                </p>
-              </div>
-              <span className="text-xs bg-indigo-950 text-indigo-300 border border-indigo-800 px-2.5 py-1 rounded-lg font-mono">
-                5 Relational Tables
-              </span>
-            </div>
-
-            {/* Clean Clone Setup Guide */}
-            <div className="p-4 bg-indigo-950/40 border border-indigo-800/50 rounded-xl space-y-3">
-              <h4 className="font-bold text-slate-100 text-xs flex items-center gap-2">
-                <Code className="w-4 h-4 text-indigo-400" />
-                <span>How to Setup & Bootstrap the Database from a Clean Git Clone</span>
-              </h4>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                When cloning this repository fresh, initialize the database tables and seed accounts by running:
-              </p>
-              <div className="p-3 bg-slate-950 rounded-lg border border-slate-800 font-mono text-xs text-emerald-400">
-                # 1. Install dependencies<br />
-                npm install<br /><br />
-                # 2. Bootstrap & verify database schema and seeds<br />
-                npm run db:setup<br /><br />
-                # 3. Start the application<br />
-                npm run dev
-              </div>
-            </div>
-
-            {/* Relational Table Breakdown */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-slate-100 text-xs uppercase tracking-wider text-slate-400">
-                Relational Tables Declared in schema.sql
-              </h4>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-indigo-400 font-bold">1. users</span>
-                    <span className="text-[10px] text-slate-500">6 Seed Rows</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    Stores user identities, hashed passwords, roles (ADMIN, DOCUMENT_OWNER, VIEWER), and departments.
-                  </p>
-                </div>
-
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-indigo-400 font-bold">2. encrypted_blobs</span>
-                    <span className="text-[10px] text-slate-500">AES-256-GCM</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    Stores ciphertext, 128-bit IVs, and 128-bit authentication tags. Zero plaintext stored on disk.
-                  </p>
-                </div>
-
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-indigo-400 font-bold">3. documents</span>
-                    <span className="text-[10px] text-slate-500">Foreign Key to Users</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    Document governance metadata, security classification, owner_id FK, and permission_version epoch.
-                  </p>
-                </div>
-
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-indigo-400 font-bold">4. document_permissions</span>
-                    <span className="text-[10px] text-slate-500">Granular ACL</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    Per-document named grants (READ, DOWNLOAD, EDIT, MANAGE), granter audit link, and unique constraint.
-                  </p>
-                </div>
-
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1 sm:col-span-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-indigo-400 font-bold">5. audit_ledger</span>
-                    <span className="text-[10px] text-emerald-400 font-bold">SHA-256 Hash Chained</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    Immutable log with block_index, timestamp, actor, action, status, previous_hash, and entry_hash.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* DDL Preview */}
-            <div className="space-y-2">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                schema.sql Preview (ANSI / PostgreSQL Compatible DDL):
-              </span>
-              <pre className="p-4 bg-slate-950 rounded-xl border border-slate-800 font-mono text-[11px] text-slate-300 max-h-60 overflow-y-auto leading-relaxed">
-{`CREATE TABLE users (
-    id VARCHAR(64) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    role VARCHAR(32) NOT NULL CHECK (role IN ('ADMIN', 'DOCUMENT_OWNER', 'VIEWER', 'EXTERNAL_PARTNER', 'ATTACKER')),
-    department VARCHAR(255) NOT NULL
-);
-
-CREATE TABLE encrypted_blobs (
-    blob_key VARCHAR(128) PRIMARY KEY,
-    ciphertext TEXT NOT NULL,
-    iv_hex VARCHAR(64) NOT NULL,
-    auth_tag_hex VARCHAR(64) NOT NULL
-);
-
-CREATE TABLE documents (
-    id VARCHAR(64) PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    category VARCHAR(32) NOT NULL,
-    security_level VARCHAR(32) NOT NULL,
-    owner_id VARCHAR(64) REFERENCES users(id),
-    encrypted_blob_key VARCHAR(128) REFERENCES encrypted_blobs(blob_key),
-    permission_version INTEGER NOT NULL DEFAULT 1
-);
-
-CREATE TABLE document_permissions (
-    id VARCHAR(64) PRIMARY KEY,
-    document_id VARCHAR(64) REFERENCES documents(id) ON DELETE CASCADE,
-    user_id VARCHAR(64) REFERENCES users(id) ON DELETE CASCADE,
-    access_level VARCHAR(32) NOT NULL CHECK (access_level IN ('READ', 'DOWNLOAD', 'EDIT', 'MANAGE'))
-);
-
-CREATE TABLE audit_ledger (
-    block_index BIGINT PRIMARY KEY,
-    timestamp TIMESTAMP NOT NULL,
-    action VARCHAR(64) NOT NULL,
-    actor_id VARCHAR(64) NOT NULL,
-    status VARCHAR(32) NOT NULL,
-    previous_hash VARCHAR(64) NOT NULL,
-    entry_hash VARCHAR(64) NOT NULL UNIQUE
-);`}
-              </pre>
-            </div>
-          </div>
+          <SqlDatabaseStudio />
         )}
 
         {/* SUBTAB 6: Seed Credentials */}

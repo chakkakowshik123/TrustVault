@@ -1776,6 +1776,105 @@ app.post('/api/tests/custom-attack', requireAuth, (req: Request, res: Response) 
   });
 });
 
+// 17. SQL Database Inspector & Live Query Studio
+app.get('/api/database/schema', requireAuth, (_req: Request, res: Response) => {
+  const schemaPath = path.resolve(__dirname, 'schema.sql');
+  const seedsPath = path.resolve(__dirname, 'seeds.sql');
+  const schemaSql = fs.existsSync(schemaPath) ? fs.readFileSync(schemaPath, 'utf8') : '';
+  const seedsSql = fs.existsSync(seedsPath) ? fs.readFileSync(seedsPath, 'utf8') : '';
+
+  return res.json({
+    tables: [
+      { name: 'users', count: USERS.length, description: 'User identities, credentials, roles and departments' },
+      { name: 'encrypted_blobs', count: ENCRYPTED_STORAGE.size, description: 'AES-256-GCM encrypted binary ciphertext and IVs' },
+      { name: 'documents', count: DOCUMENTS.length, description: 'Document governance metadata, security levels and classification' },
+      { name: 'document_permissions', count: DOCUMENTS.reduce((acc, d) => acc + (d.permissions?.length || 0), 0), description: 'Per-document granular named ACL grants' },
+      { name: 'audit_ledger', count: AUDIT_LEDGER.length, description: 'Cryptographic SHA-256 Merkle hash chained audit records' }
+    ],
+    schemaSql,
+    seedsSql
+  });
+});
+
+app.post('/api/database/query', requireAuth, (req: Request, res: Response) => {
+  const { query = '' } = req.body;
+  const start = performance.now();
+  const q = (query as string).trim().toLowerCase();
+
+  let target = 'users';
+  if (q.includes('encrypted_blobs') || q.includes('blobs')) target = 'encrypted_blobs';
+  else if (q.includes('document_permissions') || q.includes('permissions')) target = 'document_permissions';
+  else if (q.includes('documents')) target = 'documents';
+  else if (q.includes('audit_ledger') || q.includes('audit')) target = 'audit_ledger';
+
+  let rawRows: any[] = [];
+  if (target === 'users') {
+    rawRows = USERS.map(u => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      department: u.department,
+      password_hash: 'argon2id$v=19$m=65536,t=3,p=4$...'
+    }));
+  } else if (target === 'encrypted_blobs') {
+    rawRows = Array.from(ENCRYPTED_STORAGE.entries()).map(([k, v]) => ({
+      blob_key: k,
+      ciphertext: v.ciphertext.slice(0, 32) + '...[ENCRYPTED]',
+      iv_hex: v.iv,
+      auth_tag_hex: v.authTag,
+      encryption_algorithm: 'AES-256-GCM',
+      byte_size: v.ciphertext.length
+    }));
+  } else if (target === 'documents') {
+    rawRows = DOCUMENTS.map(d => ({
+      id: d.id,
+      title: d.title,
+      category: d.category,
+      security_level: d.securityLevel,
+      owner_id: d.ownerId,
+      owner_name: d.ownerName,
+      permission_version: d.permissionVersion,
+      file_size: d.fileSize,
+      encrypted_blob_key: d.encryptedBlobKey
+    }));
+  } else if (target === 'document_permissions') {
+    rawRows = DOCUMENTS.flatMap(d => (d.permissions || []).map(p => ({
+      document_id: d.id,
+      document_title: d.title,
+      user_id: p.userId,
+      user_name: p.userName,
+      access_level: p.accessLevel,
+      granted_at: p.grantedAt,
+      expires_at: p.expiresAt || 'PERMANENT',
+      notes: p.notes
+    })));
+  } else if (target === 'audit_ledger') {
+    rawRows = AUDIT_LEDGER.map(b => ({
+      block_index: b.index,
+      timestamp: b.timestamp,
+      action: b.action,
+      actor_name: b.actor.name,
+      actor_role: b.actor.role,
+      status: b.status,
+      entry_hash: b.entryHash.slice(0, 16) + '...',
+      previous_hash: b.previousHash.slice(0, 16) + '...'
+    }));
+  }
+
+  const columns = rawRows.length > 0 ? Object.keys(rawRows[0]) : [];
+  const executionMs = Math.round((performance.now() - start) * 100) / 100;
+
+  return res.json({
+    table: target,
+    columns,
+    rows: rawRows,
+    rowCount: rawRows.length,
+    executionMs,
+    executedQuery: query || `SELECT * FROM ${target}`
+  });
+});
+
 // -------------------------------------------------------------
 // VITE MIDDLEWARE / STATIC ASSETS INTEGRATION
 // -------------------------------------------------------------

@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS document_permissions (
     access_level VARCHAR(32) NOT NULL CHECK (access_level IN ('READ', 'DOWNLOAD', 'EDIT', 'MANAGE')),
     granted_by VARCHAR(64) NOT NULL,
     granted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE NULL,
     notes TEXT,
     CONSTRAINT fk_perm_document FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
     CONSTRAINT fk_perm_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

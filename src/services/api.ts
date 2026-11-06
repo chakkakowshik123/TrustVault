@@ -289,5 +289,32 @@ export const api = {
       throw new Error(err.error || `HTTP ${res.status}`);
     }
     return res.json();
+  },
+
+  // SQL Database Explorer & Query Studio
+  async getDatabaseSchema(): Promise<{
+    tables: Array<{ name: string; count: number; description: string }>;
+    schemaSql: string;
+    seedsSql: string;
+  }> {
+    const res = await fetchWithAuth('/api/database/schema');
+    if (!res.ok) throw new Error('Failed to load database schema');
+    return res.json();
+  },
+
+  async executeDatabaseQuery(query: string): Promise<{
+    table: string;
+    columns: string[];
+    rows: any[];
+    rowCount: number;
+    executionMs: number;
+    executedQuery: string;
+  }> {
+    const res = await fetchWithAuth('/api/database/query', {
+      method: 'POST',
+      body: JSON.stringify({ query })
+    });
+    if (!res.ok) throw new Error('Database query failed');
+    return res.json();
   }
 };
