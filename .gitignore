@@ -25,6 +25,8 @@ trustvault_env/
 
 # Uploaded documents (private — never commit)
 uploads/
+storage/
+data/
 
 # Test artifacts
 .pytest_cache/
