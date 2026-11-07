@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Share — {{ doc.filename }}{% endblock %}
+{% block page_title %}Manage Access{% endblock %}
+
+{% block topbar_actions %}
+<a href="/documents/{{ doc.id }}" class="btn-ghost btn-sm">← Back to Document</a>
+{% endblock %}
+
+{% block content %}
+<div class="card card-centered" id="share-card">
+  <div class="card-header">
+    <h2 class="card-title">Share "{{ doc.filename }}"</h2>
+    <p class="card-subtitle">Grant access to other registered users by email</p>
+  </div>
+
+  {% if success %}
+  <div class="alert alert-success">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1.1rem;height:1.1rem;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    {{ success }}
+  </div>
+  {% endif %}
+
+  {% if errors %}
+  <div class="alert alert-error">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1.1rem;height:1.1rem;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+    <span>{% for e in errors %}{{ e }}{% endfor %}</span>
+  </div>
+  {% endif %}
+
+  <!-- Grant form -->
+  <form action="/documents/{{ doc.id }}/share" method="post" class="share-form" id="share-form" novalidate>
+    <div class="share-row">
+      <div class="form-group share-email-group">
+        <label class="form-label" for="share-email">User's email address</label>
+        <input
+          class="form-input"
+          type="email"
+          id="share-email"
+          name="email"
+          placeholder="colleague@company.com"
+          value="{{ form.email if form else '' }}"
+          required
+        />
+      </div>
+
+      <div class="form-group share-level-group">
+        <label class="form-label">Permission level</label>
+        <div class="perm-level-selector" id="perm-level-selector">
+          <label class="perm-level-option">
+            <input type="radio" name="level" value="view" checked />
+            <div class="perm-level-card">
+              <span class="perm-level-icon">👁️</span>
+              <span class="perm-level-name">View</span>
+              <span class="perm-level-desc">Can view metadata only</span>
+            </div>
+          </label>
+          <label class="perm-level-option">
+            <input type="radio" name="level" value="download" />
+            <div class="perm-level-card">
+              <span class="perm-level-icon">⬇️</span>
+              <span class="perm-level-name">Download</span>
+              <span class="perm-level-desc">Can view and download</span>
+            </div>
+          </label>
+          <label class="perm-level-option">
+            <input type="radio" name="level" value="manage" />
+            <div class="perm-level-card">
+              <span class="perm-level-icon">⚙️</span>
+              <span class="perm-level-name">Manage</span>
+              <span class="perm-level-desc">Can share and revoke access</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="/documents/{{ doc.id }}" class="btn-ghost">Cancel</a>
+      <button type="submit" class="btn-primary" id="share-submit-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1rem;height:1rem">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/>
+        </svg>
+        Grant Access
+      </button>
+    </div>
+  </form>
+
+  <!-- Current permissions list -->
+  <div class="card-divider" style="margin:2rem 0"></div>
+  <h3 class="card-subtitle-title" style="margin-bottom:1rem">Current Access List</h3>
+
+  {% if permissions %}
+  <div class="perm-list" id="current-permissions-list">
+    {% for perm in permissions %}
+    <div class="perm-row" id="perm-row-{{ perm.id }}">
+      <div class="perm-user">
+        <div class="user-avatar user-avatar-sm">{{ perm.granted_to.username[0] | upper }}</div>
+        <div>
+          <div class="perm-username">{{ perm.granted_to.username }}</div>
+          <div class="perm-email">{{ perm.granted_to.email }}</div>
+        </div>
+      </div>
+      <span class="badge badge-perm-{{ perm.level if perm.level is string else perm.level.value }}">
+        {{ perm.level if perm.level is string else perm.level.value }}
+      </span>
+      <div class="perm-meta text-muted">Granted {{ perm.created_at.strftime('%b %d, %Y') }}</div>
+      <form action="/documents/{{ doc.id }}/revoke/{{ perm.id }}" method="post"
+            onsubmit="return confirm('Revoke access for {{ perm.granted_to.username }}?\nThey will immediately lose access to this document.')">
+        <button type="submit" class="btn-danger btn-sm" id="revoke-btn-{{ perm.id }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:.9rem;height:.9rem">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+          </svg>
+          Revoke
+        </button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state empty-state-sm">
+    <p>No one else has access to this document.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

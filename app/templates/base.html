@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{% block description %}TrustVault — Secure document management with real audit trail{% endblock %}" />
+  <title>{% block title %}TrustVault{% endblock %} — TrustVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+{% if current_user %}
+<!-- ═══════════════════════════════ APP LAYOUT ═══════════════════════════════ -->
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <svg class="brand-icon" viewBox="0 0 32 32" fill="none">
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6366f1"/>
+            <stop offset="1" stop-color="#06b6d4"/>
+          </linearGradient>
+        </defs>
+        <path d="M16 2L4 8v8c0 7 5.333 13.267 12 15 6.667-1.733 12-8 12-15V8L16 2z" fill="url(#lg1)"/>
+        <path d="M11 16l3 3 7-7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-name">TrustVault</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/documents" class="nav-link {% if request.url.path == '/documents' %}active{% endif %}" id="nav-dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="/documents/upload" class="nav-link {% if '/upload' in request.url.path %}active{% endif %}" id="nav-upload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V8m0 0l-3 3m3-3l3 3M6.75 19.5A4.5 4.5 0 015.34 10.73a5.25 5.25 0 0110.23-2.33A3 3 0 0118.75 12H18a3.75 3.75 0 010 7.5H6.75z"/>
+        </svg>
+        <span>Upload File</span>
+      </a>
+      <a href="/audit/my" class="nav-link {% if request.url.path == '/audit/my' %}active{% endif %}" id="nav-myaudit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75c0-.231-.035-.454-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/>
+        </svg>
+        <span>My Activity</span>
+      </a>
+
+      {% if current_user.role == 'admin' %}
+      <div class="nav-label nav-label-mt">Admin</div>
+      <a href="/audit" class="nav-link {% if request.url.path == '/audit' %}active{% endif %}" id="nav-audit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0H3"/>
+        </svg>
+        <span>Security Dashboard</span>
+      </a>
+      <a href="/audit/export" class="nav-link" id="nav-export">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+        </svg>
+        <span>Export CSV</span>
+      </a>
+      {% endif %}
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" aria-hidden="true">{{ current_user.username[0] | upper }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ current_user.username }}</div>
+          <div class="user-role-badge {% if current_user.role == 'admin' %}role-admin{% else %}role-member{% endif %}">
+            {{ current_user.role }}
+          </div>
+        </div>
+      </div>
+      <form action="/auth/logout" method="post" style="margin-top:.75rem">
+        <button type="submit" class="btn-logout" id="logout-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:1rem;height:1rem;flex-shrink:0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/>
+          </svg>
+          Sign out
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Mobile overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Main area -->
+  <div class="main-area">
+    <header class="topbar">
+      <button class="hamburger" id="sidebar-toggle" aria-label="Toggle navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+        </svg>
+      </button>
+      <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+      <div class="topbar-actions">{% block topbar_actions %}{% endblock %}</div>
+    </header>
+
+    {% if flash_messages %}
+    <div class="flash-stack" role="alert">
+      {% for ftype, fmsg in flash_messages %}
+      <div class="flash flash-{{ ftype }}">
+        <span>{{ fmsg }}</span>
+        <button class="flash-close" onclick="this.parentElement.remove()" aria-label="Dismiss">✕</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="page-content" id="main-content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+{% else %}
+<!-- ══════════════════════════════ AUTH LAYOUT ═══════════════════════════════ -->
+<div class="auth-bg">
+  <div class="auth-glow"></div>
+  <div class="auth-container">
+    <div class="auth-brand">
+      <svg class="auth-brand-icon" viewBox="0 0 48 48" fill="none">
+        <defs>
+          <linearGradient id="lg2" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6366f1"/>
+            <stop offset="1" stop-color="#06b6d4"/>
+          </linearGradient>
+        </defs>
+        <path d="M24 3L6 12v12c0 10.5 8 19.9 18 22.5C34 43.9 42 34.5 42 24V12L24 3z" fill="url(#lg2)"/>
+        <path d="M17 24l5 5 10-10" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="auth-brand-name">TrustVault</div>
+        <div class="auth-brand-tagline">Secure document sharing with real audit trail</div>
+      </div>
+    </div>
+    {% block auth_content %}{% endblock %}
+  </div>
+</div>
+{% endif %}
+
+<script src="/static/js/app.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

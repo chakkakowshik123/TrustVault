@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  trustvault:
+    build: .
+    container_name: trustvault
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-changeme-generate-a-real-key}
+      - DATABASE_URL=sqlite:////app/data/trustvault.db
+      - UPLOAD_DIR=/app/data/uploads
+      - MAX_FILE_SIZE_MB=50
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+    volumes:
+      # Persist database and uploaded files outside the container
+      - trustvault_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  trustvault_data:
+    driver: local

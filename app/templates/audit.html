@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{% if is_admin_view %}All Audit Logs{% else %}My Activity{% endif %}{% endblock %}
+{% block page_title %}{% if is_admin_view %}All Audit Logs{% else %}My Activity{% endif %}{% endblock %}
+
+{% block topbar_actions %}
+{% if is_admin_view %}
+<a href="/audit/export" class="btn-secondary btn-sm" id="export-csv-btn">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1rem;height:1rem">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+  </svg>
+  Export CSV
+</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card" id="audit-card">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">
+        {% if is_admin_view %}System Audit Trail{% else %}Your Activity{% endif %}
+      </h2>
+      <p class="text-muted" style="font-size:.875rem;margin-top:.25rem">
+        {{ logs | length }} event{% if logs | length != 1 %}s{% endif %} shown
+        {% if is_admin_view %}&nbsp;·&nbsp;Last 500 records{% else %}&nbsp;·&nbsp;Last 200 records{% endif %}
+      </p>
+    </div>
+    {% if logs %}
+    <input type="text" class="search-input" id="audit-search" placeholder="Search logs…" oninput="filterTable('audit-table', this.value)" />
+    {% endif %}
+  </div>
+
+  {% if logs %}
+  <div class="table-container">
+    <table class="data-table" id="audit-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          {% if is_admin_view %}<th>User</th>{% endif %}
+          <th>Action</th>
+          <th>Document</th>
+          <th>IP Address</th>
+          <th>Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr class="table-row" data-search="{{ log.action | lower }} {{ log.user.username if log.user else '' }} {{ log.document.filename if log.document else '' }} {{ log.ip_address or '' }}">
+          <td class="text-muted log-time">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+          {% if is_admin_view %}
+          <td>
+            {% if log.user %}
+            <div class="perm-user">
+              <div class="user-avatar user-avatar-xs">{{ log.user.username[0] | upper }}</div>
+              <span>{{ log.user.username }}</span>
+            </div>
+            {% else %}
+            <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          {% endif %}
+          <td>
+            <span class="badge audit-badge audit-badge-{{ log.action | lower }}">{{ log.action }}</span>
+          </td>
+          <td>
+            {% if log.document %}
+            <a href="/documents/{{ log.document.id }}" class="file-name" style="font-size:.875rem">{{ log.document.filename }}</a>
+            {% else %}
+            <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td class="text-muted log-ip">{{ log.ip_address or '—' }}</td>
+          <td>
+            {% if log.detail %}
+            <div class="audit-detail" title="{{ log.detail }}">
+              {% for k, v in log.detail.items() %}
+              <span class="detail-chip">{{ k }}: <strong>{{ v }}</strong></span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>No activity yet</h3>
+    <p>Events will appear here as you use TrustVault</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

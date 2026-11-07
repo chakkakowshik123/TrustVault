@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}404 — Not Found{% endblock %}
+{% block auth_content %}
+<div class="auth-card error-card">
+  <div class="error-code">404</div>
+  <h2 class="error-title">Page Not Found</h2>
+  <p class="error-msg">The resource you're looking for doesn't exist or has been removed.</p>
+  <a href="/documents" class="btn-primary">Go to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block title %}Security & Audit Dashboard{% endblock %}
+{% block page_title %}Security & Audit Dashboard{% endblock %}
+
+{% block topbar_actions %}
+<div style="display:flex;gap:0.5rem">
+  <button onclick="runChainVerification()" class="btn-secondary btn-sm" id="btn-verify-chain">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1rem;height:1rem">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    Verify Hash Chain
+  </button>
+  <a href="/audit/export" class="btn-primary btn-sm" id="export-csv-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1rem;height:1rem">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+    </svg>
+    Export CSV
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Top Stats Row -->
+<div class="stats-grid" style="margin-bottom:1.5rem">
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-indigo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/>
+      </svg>
+    </div>
+    <div class="stat-info">
+      <div class="stat-value">{{ total_logs }}</div>
+      <div class="stat-label">Total Audit Records</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon {% if total_denied > 0 %}stat-icon-danger{% else %}stat-icon-green{% endif %}" style="background:{% if total_denied > 0 %}rgba(239,68,68,0.12){% else %}rgba(34,197,94,0.12){% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="{% if total_denied > 0 %}#ef4444{% else %}#22c55e{% endif %}" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.002A11.959 11.959 0 0112 2.714z"/>
+      </svg>
+    </div>
+    <div class="stat-info">
+      <div class="stat-value" style="color:{% if total_denied > 0 %}#ef4444{% else %}var(--text){% endif %}">{{ total_denied }}</div>
+      <div class="stat-label">Unauthorized Access Denials</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-cyan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
+      </svg>
+    </div>
+    <div class="stat-info">
+      <div class="stat-value" id="chain-status-text" style="font-size:1.1rem;color:{% if chain_status.is_valid %}#22c55e{% else %}#ef4444{% endif %}">
+        {% if chain_status.is_valid %}SECURE & VALID{% else %}TAMPER DETECTED{% endif %}
+      </div>
+      <div class="stat-label">Cryptographic Hash Chain</div>
+    </div>
+  </div>
+</div>
+
+<!-- Anomaly Alert Banner (Rule #6) -->
+{% if anomalies %}
+<div class="card" style="margin-bottom:1.5rem;border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.04)">
+  <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+    <span style="font-size:1.25rem">🚨</span>
+    <h3 style="font-size:1rem;color:#fca5a5;font-weight:600">Active Security Anomalies & Alerts</h3>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:0.5rem">
+    {% for alert in anomalies %}
+    <div style="display:flex;align-items:flex-start;gap:0.75rem;padding:0.6rem 0.8rem;background:rgba(0,0,0,0.3);border-radius:8px;border-left:3px solid {% if alert.severity == 'critical' %}#ef4444{% elif alert.severity == 'high' %}#f97316{% else %}#f59e0b{% endif %}">
+      <div>
+        <div style="font-size:0.82rem;font-weight:700;color:var(--text)">{{ alert.title }}</div>
+        <div style="font-size:0.75rem;color:var(--text2)">{{ alert.description }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Tabs Navigation -->
+<div class="card" id="audit-main-card">
+  <div style="display:flex;gap:1rem;border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:1.25rem">
+    <button class="btn-ghost active-tab" onclick="switchTab('tab-all')" id="tab-btn-all" style="font-weight:600">All Activity ({{ recent_logs|length }})</button>
+    <button class="btn-ghost" onclick="switchTab('tab-denied')" id="tab-btn-denied" style="font-weight:600;color:#fca5a5">Refused Attempts ({{ denied_logs|length }})</button>
+    <button class="btn-ghost" onclick="switchTab('tab-perms')" id="tab-btn-perms" style="font-weight:600">Permission Changes ({{ permission_changes|length }})</button>
+  </div>
+
+  <!-- Tab 1: All Activity -->
+  <div id="tab-all" class="tab-content">
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Document</th>
+            <th>IP Address</th>
+            <th>Hash Chain Pointer</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in recent_logs %}
+          <tr class="table-row">
+            <td class="text-muted" style="font-family:monospace">{{ log.sequence }}</td>
+            <td class="text-muted" style="font-size:0.8rem">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>
+              {% if log.user %}
+              <span style="font-weight:500">{{ log.user.username }}</span>
+              <span class="text-muted" style="font-size:0.75rem">({{ log.user.role }})</span>
+              {% else %}
+              <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td><span class="badge audit-badge audit-badge-{{ log.action|lower }}">{{ log.action }}</span></td>
+            <td>
+              {% if log.document %}
+              <span style="font-size:0.85rem">{{ log.document.filename }}</span>
+              {% else %}
+              <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="text-muted" style="font-family:monospace;font-size:0.78rem">{{ log.ip_address or '—' }}</td>
+            <td>
+              <span title="Current: {{ log.current_hash }}&#10;Prev: {{ log.prev_hash }}" style="font-family:monospace;font-size:0.72rem;background:rgba(255,255,255,0.05);padding:0.2rem 0.4rem;border-radius:4px">
+                {{ log.current_hash[:8] }}...{{ log.current_hash[-4:] }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 2: Denied Attempts -->
+  <div id="tab-denied" class="tab-content hidden">
+    {% if denied_logs %}
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Target Document</th>
+            <th>IP Address</th>
+            <th>Reason / Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in denied_logs %}
+          <tr class="table-row">
+            <td class="text-muted" style="font-size:0.8rem">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>
+              {% if log.user %}
+              <span style="font-weight:600;color:#fca5a5">{{ log.user.username }}</span>
+              {% else %}
+              <span class="text-muted">Unauthenticated</span>
+              {% endif %}
+            </td>
+            <td>{{ log.document_id or '—' }}</td>
+            <td class="text-muted" style="font-family:monospace">{{ log.ip_address }}</td>
+            <td style="font-size:0.8rem">
+              {% if log.detail %}
+              {% for k, v in log.detail.items() %}
+              <span class="detail-chip">{{ k }}: <strong>{{ v }}</strong></span>
+              {% endfor %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state empty-state-sm">
+      <p>No unauthorized access attempts recorded. System is secure.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Tab 3: Permission Changes -->
+  <div id="tab-perms" class="tab-content hidden">
+    {% if permission_changes %}
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Actor</th>
+            <th>Action</th>
+            <th>Document</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in permission_changes %}
+          <tr class="table-row">
+            <td class="text-muted" style="font-size:0.8rem">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>{{ log.user.username if log.user else 'System' }}</td>
+            <td><span class="badge audit-badge audit-badge-{{ log.action|lower }}">{{ log.action }}</span></td>
+            <td>{{ log.document.filename if log.document else log.document_id }}</td>
+            <td style="font-size:0.8rem">
+              {% if log.detail %}
+              {% for k, v in log.detail.items() %}
+              <span class="detail-chip">{{ k }}: <strong>{{ v }}</strong></span>
+              {% endfor %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state empty-state-sm">
+      <p>No permission change events recorded yet.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById(tabId).classList.remove('hidden');
+
+  document.querySelectorAll('#audit-main-card button').forEach(b => b.style.borderBottom = 'none');
+  const activeBtn = document.getElementById('tab-btn-' + tabId.replace('tab-', ''));
+  if (activeBtn) activeBtn.style.borderBottom = '2px solid var(--accent)';
+}
+
+async function runChainVerification() {
+  const btn = document.getElementById('btn-verify-chain');
+  const originalHtml = btn.innerHTML;
+  btn.innerText = 'Verifying...';
+  try {
+    const res = await fetch('/audit/verify-chain');
+    const data = await res.json();
+    if (data.is_valid) {
+      alert('✅ Cryptographic Hash Chain Verified!\n\nAll ' + data.total_records + ' audit entries form an unbroken, untampered SHA-256 hash chain.');
+    } else {
+      alert('❌ TAMPERING DETECTED!\n\n' + data.message);
+    }
+  } catch (err) {
+    alert('Verification request failed: ' + err);
+  } finally {
+    btn.innerHTML = originalHtml;
+  }
+}
+</script>
+{% endblock %}

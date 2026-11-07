@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Edit Document — {{ doc.filename }}{% endblock %}
+{% block page_title %}Edit Document{% endblock %}
+
+{% block content %}
+<div class="card card-centered" id="edit-doc-card">
+  <div class="card-header">
+    <h2 class="card-title">Edit Document</h2>
+    <p class="card-subtitle">Update metadata or replace file content securely</p>
+  </div>
+
+  {% if errors %}
+  <div class="alert alert-error">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1.1rem;height:1.1rem;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+    <span>{% for e in errors %}{{ e }}{% endfor %}</span>
+  </div>
+  {% endif %}
+
+  <form action="/documents/{{ doc.id }}/edit" method="post" enctype="multipart/form-data" class="auth-form" novalidate>
+    <div class="form-group">
+      <label class="form-label" for="filename">Document Name</label>
+      <input
+        class="form-input"
+        type="text"
+        id="filename"
+        name="filename"
+        value="{{ doc.filename }}"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="category">Category</label>
+      <select class="form-input" id="category" name="category">
+        {% for cat in categories %}
+        <option value="{{ cat }}" {% if doc.category.value == cat or doc.category == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="description">Description <span class="label-optional">(optional)</span></label>
+      <textarea
+        class="form-input form-textarea"
+        id="description"
+        name="description"
+        rows="3"
+        maxlength="500"
+      >{{ doc.description or '' }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="file">Replace File Content <span class="label-optional">(optional)</span></label>
+      <input
+        type="file"
+        id="file"
+        name="file"
+        class="form-input"
+      />
+      <div style="font-size:0.75rem;color:var(--text3);margin-top:0.25rem">
+        Leave empty to retain existing file. New file will be checked for magic bytes and size limits.
+      </div>
+    </div>
+
+    <div class="form-actions" style="margin-top:1.5rem">
+      <a href="/documents/{{ doc.id }}" class="btn-ghost">Cancel</a>
+      <button type="submit" class="btn-primary" id="save-edit-btn">Save Changes</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

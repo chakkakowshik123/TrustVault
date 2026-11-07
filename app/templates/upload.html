@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Upload Document{% endblock %}
+{% block page_title %}Upload Document{% endblock %}
+
+{% block content %}
+<div class="card card-centered" id="upload-card">
+  <div class="card-header">
+    <h2 class="card-title">Upload a Secure File</h2>
+    <p class="card-subtitle">Files are validated, encrypted at rest, and stored outside the web root</p>
+  </div>
+
+  {% if errors %}
+  <div class="alert alert-error">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1.1rem;height:1.1rem;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+    <span>{% for e in errors %}{{ e }}{% if not loop.last %} &middot; {% endif %}{% endfor %}</span>
+  </div>
+  {% endif %}
+
+  <form action="/documents/upload" method="post" enctype="multipart/form-data" id="upload-form" novalidate>
+
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div class="drop-zone-content" id="drop-zone-idle">
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"/>
+          </svg>
+        </div>
+        <div class="drop-text">
+          <span class="drop-primary">Drop files here</span>
+          <span class="drop-secondary">or <strong>browse</strong> to upload</span>
+        </div>
+        <div class="drop-hint">PDF, DOCX, XLSX, Images, Text · Max 50 MB · Executables blocked</div>
+      </div>
+      <div class="drop-zone-content hidden" id="drop-zone-selected">
+        <div class="selected-file-icon">📄</div>
+        <div class="selected-file-name" id="selected-file-name">—</div>
+        <div class="selected-file-size" id="selected-file-size"></div>
+      </div>
+    </div>
+    <input type="file" id="file-input" name="file" class="hidden" required onchange="onFileSelected(this)" />
+
+    <div class="form-group" style="margin-top:1.5rem">
+      <label class="form-label" for="category">Category</label>
+      <select class="form-input" id="category" name="category">
+        {% for cat in categories %}
+        <option value="{{ cat }}">{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="description">Description <span class="label-optional">(optional)</span></label>
+      <textarea
+        class="form-input form-textarea"
+        id="description"
+        name="description"
+        placeholder="Brief summary of document content…"
+        rows="3"
+        maxlength="500"
+      ></textarea>
+      <div class="char-counter"><span id="desc-count">0</span>/500</div>
+    </div>
+
+    <div class="form-actions">
+      <a href="/documents" class="btn-ghost">Cancel</a>
+      <button type="submit" class="btn-primary" id="upload-submit-btn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1rem;height:1rem">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"/>
+        </svg>
+        Upload Securely
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

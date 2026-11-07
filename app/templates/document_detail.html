@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}{{ doc.filename }}{% endblock %}
+{% block page_title %}Document Details{% endblock %}
+
+{% block topbar_actions %}
+<div style="display:flex;gap:0.5rem">
+  {% if can_download %}
+  <a href="/documents/{{ doc.id }}/download" class="btn-primary btn-sm" id="download-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1rem;height:1rem">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+    </svg>
+    Download
+  </a>
+  {% endif %}
+  {% if can_edit %}
+  <a href="/documents/{{ doc.id }}/edit" class="btn-secondary btn-sm" id="edit-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1rem;height:1rem">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+    </svg>
+    Edit
+  </a>
+  {% endif %}
+  {% if can_share %}
+  <a href="/documents/{{ doc.id }}/share" class="btn-secondary btn-sm" id="share-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1rem;height:1rem">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/>
+    </svg>
+    Share
+  </a>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="detail-layout">
+
+  <!-- Document Info Card -->
+  <div class="card" id="doc-info-card">
+    <div class="doc-hero">
+      <div class="doc-hero-icon" data-ext="{{ doc.filename.split('.')[-1] | lower }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+        </svg>
+      </div>
+      <div class="doc-hero-info">
+        <h2 class="doc-filename">{{ doc.filename }}</h2>
+        {% if doc.description %}
+        <p class="doc-description">{{ doc.description }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="meta-grid">
+      <div class="meta-item">
+        <span class="meta-label">Category</span>
+        <span class="meta-value"><span class="badge badge-type">{{ doc.category }}</span></span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">File Type</span>
+        <span class="meta-value"><span class="badge badge-type">{{ doc.mime_type }}</span></span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Size</span>
+        <span class="meta-value">{{ (doc.size_bytes / 1024) | round(2) }} KB</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Owner</span>
+        <span class="meta-value">{{ doc.owner.username }} {% if is_owner %}<span class="badge badge-you">You</span>{% endif %}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Uploaded</span>
+        <span class="meta-value">{{ doc.created_at.strftime('%B %d, %Y at %H:%M UTC') }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Your Access</span>
+        <span class="meta-value">
+          {% if is_owner %}
+          <span class="badge badge-perm-manage">Owner</span>
+          {% elif user_perm %}
+          <span class="badge badge-perm-{{ user_perm.level }}">
+            {{ user_perm.level }}
+          </span>
+          {% endif %}
+        </span>
+      </div>
+    </div>
+
+    {% if is_owner %}
+    <div class="card-divider"></div>
+    <div class="danger-zone" id="danger-zone">
+      <span class="danger-label">Danger Zone</span>
+      <form action="/documents/{{ doc.id }}/delete" method="post" onsubmit="return confirm('Permanently delete {{ doc.filename }}?\nThis action cannot be undone.')">
+        <button type="submit" class="btn-danger btn-sm" id="delete-doc-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1rem;height:1rem">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+          </svg>
+          Delete Document
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Permissions Card (owner only) -->
+  {% if is_owner %}
+  <div class="card" id="permissions-card">
+    <div class="card-header-row">
+      <h3 class="card-subtitle-title">Active Grants</h3>
+      <a href="/documents/{{ doc.id }}/share" class="btn-primary btn-sm" id="manage-share-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:.9rem;height:.9rem">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+        </svg>
+        Grant Access
+      </a>
+    </div>
+
+    {% if permissions %}
+    <div class="perm-list" id="permissions-list">
+      {% for perm in permissions %}
+      <div class="perm-row" id="perm-{{ perm.id }}">
+        <div class="perm-user">
+          <div class="user-avatar user-avatar-sm">{{ perm.granted_to.username[0] | upper }}</div>
+          <div>
+            <div class="perm-username">{{ perm.granted_to.username }}</div>
+            <div class="perm-email">{{ perm.granted_to.email }}</div>
+          </div>
+        </div>
+        <span class="badge badge-perm-{{ perm.level }}">
+          {{ perm.level }}
+        </span>
+        <form action="/documents/{{ doc.id }}/revoke/{{ perm.id }}" method="post"
+              onsubmit="return confirm('Revoke access for {{ perm.granted_to.username }}?')">
+          <button type="submit" class="icon-btn icon-btn-danger" title="Revoke access" id="revoke-{{ perm.id }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state empty-state-sm">
+      <p>This document has not been shared with anyone yet.</p>
+      <a href="/documents/{{ doc.id }}/share" class="btn-primary btn-sm" style="margin-top:0.5rem">Grant access now</a>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
