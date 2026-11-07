@@ -1,6 +1,23 @@
 # TrustVault — Deployment Guide
 
-## 1. Local Development
+## Quickest Start: Standalone Single File (`trustvault_standalone.py`)
+
+If you want to run or deploy the entire platform from a **single self-contained file**:
+
+```bash
+# 1. Install dependencies
+pip install fastapi uvicorn sqlalchemy bcrypt python-jose jinja2 python-multipart
+
+# 2. Run immediately (auto-seeds demo accounts and cryptographic chain)
+python trustvault_standalone.py
+# Or using uvicorn:
+uvicorn trustvault_standalone:app --host 0.0.0.0 --port 8000
+```
+Open **http://localhost:8000** — 1-click Demo cards are available for Admin, Owner, and Viewer.
+
+---
+
+## 1. Local Development (Modular Stack)
 
 ```bash
 # Clone / enter project
