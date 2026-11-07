@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: trustvault
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python trustvault_standalone.py
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.12.0
